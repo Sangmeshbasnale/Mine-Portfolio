@@ -77,3 +77,502 @@
   onScroll();
 
   backTop.addEventListener('click', () => document.getElementById('home').scrollIntoView({ behavior: 'smooth' }));
+
+  // --- Contact Form & Admin Inbox Logic ---
+
+  // Storage Keys
+  const PIN_KEY = 'admin_passcode';
+  const KEY_KEY = 'web3forms_key';
+  const MSG_KEY = 'inbox_messages';
+
+  // Initialize Default passcode if not set
+  if (!localStorage.getItem(PIN_KEY)) {
+    localStorage.setItem(PIN_KEY, '1234');
+  }
+
+  // DOM Elements
+  const contactForm = document.getElementById('contact-form');
+  const formStatus = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  const adminTrigger = document.getElementById('admin-trigger');
+  const adminClose = document.getElementById('admin-close');
+  const adminModal = document.getElementById('admin-modal');
+
+  const loginScreen = document.getElementById('admin-login-screen');
+  const pinInput = document.getElementById('admin-pin-input');
+  const loginBtn = document.getElementById('admin-login-btn');
+  const loginError = document.getElementById('admin-login-error');
+
+  const dashboardScreen = document.getElementById('admin-dashboard-screen');
+  const logoutBtn = document.getElementById('admin-logout-btn');
+  const unreadBadge = document.getElementById('unread-count-badge');
+
+  const tabBtnMessages = document.getElementById('tab-btn-messages');
+  const tabBtnSettings = document.getElementById('tab-btn-settings');
+  const tabMessagesContent = document.getElementById('tab-messages-content');
+  const tabSettingsContent = document.getElementById('tab-settings-content');
+
+  const messageSearch = document.getElementById('message-search');
+  const filterAllBtn = document.getElementById('filter-all-btn');
+  const filterUnreadBtn = document.getElementById('filter-unread-btn');
+  const messageList = document.getElementById('message-list');
+
+  const detailsEmpty = document.getElementById('message-details-empty');
+  const detailsContent = document.getElementById('message-details-content');
+  const detailsSenderName = document.getElementById('details-sender-name');
+  const detailsSenderEmail = document.getElementById('details-sender-email');
+  const detailsDate = document.getElementById('details-date');
+  const detailsMessageText = document.getElementById('details-message-text');
+  const replyText = document.getElementById('reply-text');
+  const sendReplyBtn = document.getElementById('send-reply-btn');
+  const actionUnreadBtn = document.getElementById('action-unread-btn');
+  const actionDeleteBtn = document.getElementById('action-delete-btn');
+
+  const web3formsKeyInput = document.getElementById('web3forms-key-input');
+  const newPinInput = document.getElementById('new-pin-input');
+  const confirmPinInput = document.getElementById('confirm-pin-input');
+  const saveSettingsBtn = document.getElementById('save-settings-btn');
+  const settingsStatusMsg = document.getElementById('settings-status-msg');
+
+  // State
+  let activeMessage = null;
+  let currentFilter = 'all';
+  let searchQuery = '';
+
+  // Helpers
+  function getMessages() {
+    try {
+      return JSON.parse(localStorage.getItem(MSG_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveMessages(msgs) {
+    localStorage.setItem(MSG_KEY, JSON.stringify(msgs));
+  }
+
+  // 1. Submit Form
+  if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(contactForm);
+      const name = formData.get('name');
+      const email = formData.get('email');
+      const message = formData.get('message');
+      
+      // Save locally
+      const messages = getMessages();
+      const newMsg = {
+        id: 'msg_' + Date.now(),
+        name,
+        email,
+        message,
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      messages.unshift(newMsg);
+      saveMessages(messages);
+
+      // UI Loading state
+      submitBtn.disabled = true;
+      formStatus.textContent = 'Sending message...';
+      formStatus.className = 'form-status visible loading';
+
+      const apiKey = localStorage.getItem(KEY_KEY) || '';
+      let apiSuccess = true;
+
+      if (apiKey) {
+        // Submit to Web3Forms API
+        try {
+          const response = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              access_key: apiKey,
+              name: name,
+              email: email,
+              message: message,
+              subject: `New Portfolio Message from ${name}`
+            })
+          });
+          const result = await response.json();
+          apiSuccess = result.success;
+        } catch (error) {
+          console.error('API submit error:', error);
+          apiSuccess = false;
+        }
+      }
+
+      submitBtn.disabled = false;
+      if (apiSuccess) {
+        formStatus.textContent = 'Message sent successfully!';
+        formStatus.className = 'form-status visible success';
+        contactForm.reset();
+        setTimeout(() => {
+          formStatus.className = 'form-status';
+        }, 5000);
+      } else {
+        formStatus.textContent = 'Saved locally, but failed to deliver email.';
+        formStatus.className = 'form-status visible error';
+        setTimeout(() => {
+          formStatus.className = 'form-status';
+        }, 5000);
+      }
+    });
+  }
+
+  // 2. Open/Close Modal
+  if (adminTrigger) {
+    adminTrigger.addEventListener('click', () => {
+      adminModal.classList.add('show');
+      adminModal.setAttribute('aria-hidden', 'false');
+      // If already logged in this session
+      if (sessionStorage.getItem('admin_logged_in') === 'true') {
+        showDashboard();
+      } else {
+        showLogin();
+      }
+    });
+  }
+
+  if (adminClose) {
+    adminClose.addEventListener('click', () => {
+      adminModal.classList.remove('show');
+      adminModal.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  // Close modal on click outside content
+  window.addEventListener('click', (e) => {
+    if (e.target === adminModal) {
+      adminModal.classList.remove('show');
+      adminModal.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // Close on Escape key
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && adminModal.classList.contains('show')) {
+      adminModal.classList.remove('show');
+      adminModal.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // 3. Login Flow
+  function showLogin() {
+    loginScreen.classList.remove('hidden');
+    dashboardScreen.classList.add('hidden');
+    pinInput.value = '';
+    loginError.textContent = '';
+    setTimeout(() => pinInput.focus(), 100);
+  }
+
+  function showDashboard() {
+    loginScreen.classList.add('hidden');
+    dashboardScreen.classList.remove('hidden');
+    sessionStorage.setItem('admin_logged_in', 'true');
+    
+    // Reset tabs
+    switchTab('messages');
+    
+    // Load Settings Values
+    web3formsKeyInput.value = localStorage.getItem(KEY_KEY) || '';
+    newPinInput.value = '';
+    confirmPinInput.value = '';
+    settingsStatusMsg.textContent = '';
+    settingsStatusMsg.className = 'settings-status';
+
+    // Refresh inbox
+    refreshInbox();
+  }
+
+  if (loginBtn) {
+    loginBtn.addEventListener('click', handleLogin);
+  }
+  if (pinInput) {
+    pinInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  }
+
+  function handleLogin() {
+    const pinVal = pinInput.value;
+    const correctPin = localStorage.getItem(PIN_KEY) || '1234';
+    if (pinVal === correctPin) {
+      showDashboard();
+    } else {
+      loginError.textContent = 'Incorrect passcode. Try again.';
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('admin_logged_in');
+      showLogin();
+    });
+  }
+
+  // 4. Tab Navigation
+  function switchTab(tab) {
+    if (tab === 'messages') {
+      tabBtnMessages.classList.add('active');
+      tabBtnSettings.classList.remove('active');
+      tabMessagesContent.classList.remove('hidden');
+      tabSettingsContent.classList.add('hidden');
+    } else {
+      tabBtnMessages.classList.remove('active');
+      tabBtnSettings.classList.add('active');
+      tabMessagesContent.classList.add('hidden');
+      tabSettingsContent.classList.remove('hidden');
+    }
+  }
+
+  if (tabBtnMessages) {
+    tabBtnMessages.addEventListener('click', () => switchTab('messages'));
+  }
+  if (tabBtnSettings) {
+    tabBtnSettings.addEventListener('click', () => switchTab('settings'));
+  }
+
+  // 5. Inbox Operations
+  function refreshInbox() {
+    const messages = getMessages();
+    
+    // Update Badge
+    const unreadCount = messages.filter(m => !m.read).length;
+    unreadBadge.textContent = `${unreadCount} New`;
+    unreadBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+
+    renderMessageList();
+  }
+
+  function renderMessageList() {
+    const messages = getMessages();
+    messageList.innerHTML = '';
+
+    // Filter
+    let filtered = messages;
+    if (currentFilter === 'unread') {
+      filtered = messages.filter(m => !m.read);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(m => 
+        m.name.toLowerCase().includes(q) || 
+        m.email.toLowerCase().includes(q) || 
+        m.message.toLowerCase().includes(q)
+      );
+    }
+
+    if (filtered.length === 0) {
+      messageList.innerHTML = `<div class="message-list-empty">No messages found</div>`;
+      return;
+    }
+
+    filtered.forEach(msg => {
+      const item = document.createElement('div');
+      item.className = `message-item ${msg.read ? '' : 'unread'} ${activeMessage && activeMessage.id === msg.id ? 'active' : ''}`;
+      
+      const dateStr = formatDate(msg.timestamp);
+
+      item.innerHTML = `
+        <div class="message-item-header">
+          <div class="message-item-name">${escapeHTML(msg.name)}</div>
+          <div class="message-item-time">${dateStr}</div>
+        </div>
+        <div class="message-item-snippet">${escapeHTML(msg.message)}</div>
+      `;
+
+      item.addEventListener('click', () => selectMessage(msg));
+      messageList.appendChild(item);
+    });
+  }
+
+  function selectMessage(msg) {
+    activeMessage = msg;
+    
+    // Mark as read
+    if (!msg.read) {
+      const messages = getMessages();
+      const index = messages.findIndex(m => m.id === msg.id);
+      if (index !== -1) {
+        messages[index].read = true;
+        saveMessages(messages);
+      }
+      refreshInbox();
+    } else {
+      renderMessageList();
+    }
+
+    // Populate detail view
+    detailsSenderName.textContent = msg.name;
+    detailsSenderEmail.textContent = msg.email;
+    detailsSenderEmail.href = `mailto:${msg.email}`;
+    detailsDate.textContent = formatDateFull(msg.timestamp);
+    detailsMessageText.textContent = msg.message;
+    replyText.value = '';
+
+    detailsEmpty.classList.add('hidden');
+    detailsContent.classList.remove('hidden');
+  }
+
+  // 6. Message Actions
+  if (actionUnreadBtn) {
+    actionUnreadBtn.addEventListener('click', () => {
+      if (!activeMessage) return;
+      const messages = getMessages();
+      const index = messages.findIndex(m => m.id === activeMessage.id);
+      if (index !== -1) {
+        messages[index].read = false;
+        saveMessages(messages);
+      }
+      activeMessage = null;
+      detailsEmpty.classList.remove('hidden');
+      detailsContent.classList.add('hidden');
+      refreshInbox();
+    });
+  }
+
+  if (actionDeleteBtn) {
+    actionDeleteBtn.addEventListener('click', () => {
+      if (!activeMessage) return;
+      if (!confirm('Are you sure you want to delete this message?')) return;
+      
+      const messages = getMessages();
+      const filtered = messages.filter(m => m.id !== activeMessage.id);
+      saveMessages(filtered);
+      
+      activeMessage = null;
+      detailsEmpty.classList.remove('hidden');
+      detailsContent.classList.add('hidden');
+      refreshInbox();
+    });
+  }
+
+  // Reply Draft
+  if (sendReplyBtn) {
+    sendReplyBtn.addEventListener('click', () => {
+      if (!activeMessage) return;
+      const replyBody = replyText.value.trim();
+      if (!replyBody) {
+        alert('Please write a reply before sending.');
+        return;
+      }
+
+      const subject = `Re: Message from Portfolio`;
+      const mailtoLink = `mailto:${activeMessage.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(replyBody)}`;
+      
+      // Open in system mail application
+      window.location.href = mailtoLink;
+    });
+  }
+
+  // Search & Filter
+  if (messageSearch) {
+    messageSearch.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderMessageList();
+    });
+  }
+
+  if (filterAllBtn) {
+    filterAllBtn.addEventListener('click', () => {
+      currentFilter = 'all';
+      filterAllBtn.classList.add('active');
+      filterUnreadBtn.classList.remove('active');
+      renderMessageList();
+    });
+  }
+
+  if (filterUnreadBtn) {
+    filterUnreadBtn.addEventListener('click', () => {
+      currentFilter = 'unread';
+      filterAllBtn.classList.remove('active');
+      filterUnreadBtn.classList.add('active');
+      renderMessageList();
+    });
+  }
+
+  // Settings Save
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener('click', () => {
+      const apiKeyVal = web3formsKeyInput.value.trim();
+      const newPinVal = newPinInput.value;
+      const confirmPinVal = confirmPinInput.value;
+
+      // 1. Save Web3Forms Key
+      localStorage.setItem(KEY_KEY, apiKeyVal);
+
+      // 2. Save Passcode if changed
+      if (newPinVal || confirmPinVal) {
+        if (newPinVal !== confirmPinVal) {
+          settingsStatusMsg.textContent = 'Passcodes do not match.';
+          settingsStatusMsg.className = 'settings-status error';
+          return;
+        }
+        if (newPinVal.length < 4) {
+          settingsStatusMsg.textContent = 'Passcode must be at least 4 digits.';
+          settingsStatusMsg.className = 'settings-status error';
+          return;
+        }
+        localStorage.setItem(PIN_KEY, newPinVal);
+      }
+
+      settingsStatusMsg.textContent = 'Settings saved successfully!';
+      settingsStatusMsg.className = 'settings-status success';
+      newPinInput.value = '';
+      confirmPinInput.value = '';
+
+      setTimeout(() => {
+        settingsStatusMsg.textContent = '';
+        settingsStatusMsg.className = 'settings-status';
+      }, 3000);
+    });
+  }
+
+  // Utility Date Formatters
+  function formatDate(isoString) {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return '';
+    const now = new Date();
+    
+    // Check if today
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    // Otherwise format date
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+
+  function formatDateFull(isoString) {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString([], {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function escapeHTML(str) {
+    return str.replace(/[&<>'"]/g, 
+      tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag)
+    );
+  }

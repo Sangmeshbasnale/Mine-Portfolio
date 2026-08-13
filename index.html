@@ -3,14 +3,34 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sangmesh Basnale — Software Developer</title>
+<title>Sangmesh Basnale — Software Developer | Backend Engineering & Scalable Systems</title>
+<meta name="description" content="Portfolio of Sangmesh Basnale, a Software Developer specializing in Java, RESTful APIs, Spring Boot microservices, SQL database design, and containerized Docker deployment." />
+<meta name="author" content="Sangmesh Basnale" />
+<link rel="canonical" href="https://sangmeshbasnale.github.io/" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sangmeshbasnale.github.io/" />
+<meta property="og:title" content="Sangmesh Basnale — Software Developer" />
+<meta property="og:description" content="Results-driven Software Developer specializing in Java backend architecture, REST APIs, SQL database design, and Docker deployment." />
+<meta property="og:image" content="https://sangmeshbasnale.github.io/images/profile.jpg" />
+<meta property="og:site_name" content="Sangmesh Basnale Portfolio" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Sangmesh Basnale — Software Developer" />
+<meta name="twitter:description" content="Results-driven Software Developer specializing in Java backend architecture, REST APIs, SQL database design, and Docker deployment." />
+<meta name="twitter:image" content="https://sangmeshbasnale.github.io/images/profile.jpg" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav id="nav">
+<header>
+<nav id="nav" aria-label="Main Navigation">
   <div class="nav-inner">
     <button class="brand" data-scroll="home">SANGMESH&nbsp;BASNALE</button>
     <div class="nav-links">
@@ -26,7 +46,7 @@
         <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       </a>
     </div>
-    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
       <svg class="icon" viewBox="0 0 24 24" id="menu-icon"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
     </button>
   </div>
@@ -40,12 +60,16 @@
     <button data-scroll="contact">Contact</button>
   </div>
 </nav>
+</header>
 
+<main id="main-content">
 <!-- HERO -->
 <section id="home" style="border-top:none;">
   <div class="wrap">
     <div class="eyebrow reveal">B.Tech, Computer Science · Govt. Engineering College, Bidar · 2022 – 2026</div>
-    <img src="images/profile.jpg" alt="Sangmesh Basnale" class="hero-profile-img reveal" onerror="this.style.display='none'">
+    <a href="#education" data-scroll="education" class="hero-profile-link reveal" aria-label="Scroll to Education section" title="Click to view Education">
+      <img src="images/profile.jpg" alt="Sangmesh Basnale photo" class="hero-profile-img" width="72" height="72" loading="eager" decoding="async" onerror="this.style.display='none'">
+    </a>
     <h1 class="headline display reveal">Software Developer —<br><span class="grad-text">Backend Engineering<br>&amp; Scalable Systems.</span></h1>
     <p class="bio reveal">
       Results-driven software developer with hands-on experience in Java, backend
@@ -73,7 +97,7 @@
     <div class="section-label reveal"><span class="idx">01</span><span class="lbl">About</span></div>
     <div class="about-grid">
       <div class="profile-photo-wrap reveal">
-        <img src="images/profile.jpg" alt="Sangmesh Basnale"
+        <img src="images/profile.jpg" alt="Sangmesh Basnale profile portrait" width="180" height="180" loading="lazy" decoding="async"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
         <div class="photo-placeholder">
           Add your photo as
@@ -109,15 +133,43 @@
 <section id="education">
   <div class="wrap">
     <div class="section-label reveal"><span class="idx">02</span><span class="lbl">Education</span></div>
-    <div style="margin-top:1.5rem;">
-      <div class="edu-row reveal">
-        <div class="period">Nov 2022 – Apr 2026</div>
-        <div>
-          <h3 class="display">Bachelor of Technology in Computer Science</h3>
-          <div class="org">Government Engineering College, Bidar · Karnataka</div>
-          <p>CGPA: 8.55 / 10.0</p>
-        </div>
+    <div class="edu-timeline">
+
+      <!-- Entry 1: SSLC -->
+      <div class="edu-timeline-item reveal">
+        <div class="edu-timeline-dot"></div>
+        <div class="edu-period">Completed June/July 2020</div>
+        <h3 class="edu-title display">SSLC (10th Standard)</h3>
+        <div class="edu-org">Maharshi Dayanand Saraswati Public School, Bhalki, Bidar Dist.</div>
+        <div class="edu-board">Karnataka Secondary Education Examination Board (KSEEB)</div>
+        <div class="edu-result">Result: June/July 2020 — 567 / 625 Marks — 90.72% — Overall Grade A+</div>
       </div>
+
+      <!-- Entry 2: PUC -->
+      <div class="edu-timeline-item reveal">
+        <div class="edu-timeline-dot"></div>
+        <div class="edu-period">Completed April 2022</div>
+        <h3 class="edu-title display">PUC (12th Standard) — Science (PCMB)</h3>
+        <div class="edu-org">Diamond Independent PU College, Bhalki, Bidar Dist.</div>
+        <div class="edu-board">Department of Pre-University Education, Karnataka</div>
+        <div class="edu-result">Result: April 2022 — 542 / 600 Marks — Distinction</div>
+      </div>
+
+      <!-- Entry 3: B.Tech -->
+      <div class="edu-timeline-item reveal">
+        <div class="edu-timeline-dot"></div>
+        <div class="edu-period">Nov 2022 – Apr 2026</div>
+        <h3 class="edu-title display">B.Tech, Computer Science &amp; Engineering</h3>
+        <div class="edu-org">Government Engineering College, Bidar · Karnataka</div>
+        <div class="edu-board">Affiliated with Visvesvaraya Technological University (VTU), Belagavi · NAAC 'A' Accredited · AICTE Approved</div>
+        <div class="edu-result">Current CGPA: 8.55 / 10.0</div>
+        <p class="edu-desc">
+          GEC Bidar was approved in 2022 by the Government of Karnataka and is located on Mailoor Road, Bidar.
+          It is affiliated with Visvesvaraya Technological University (VTU), Belagavi, approved by AICTE, and has received "A" accreditation from NAAC.
+          It offers two UG programs: B.E. in Computer Science and Engineering, and B.E. in Artificial Intelligence and Data Science.
+        </p>
+      </div>
+
     </div>
   </div>
 </section>
@@ -152,7 +204,7 @@
 
       <div class="proj-row reveal">
         <div class="project-shot">
-          <img src="images/project-ecommerce.jpg" alt="Enterprise E-Commerce Backend screenshot"
+          <img src="images/project-ecommerce.jpg" alt="Enterprise E-Commerce Backend architecture screenshot" width="800" height="450" loading="lazy" decoding="async"
                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="shot-placeholder">
             Add a screenshot as
@@ -182,7 +234,7 @@
 
       <div class="proj-row reveal">
         <div class="project-shot">
-          <img src="images/project-compliance.jpg" alt="Compliance Calendar & Tracker screenshot"
+          <img src="images/project-compliance.jpg" alt="Compliance Calendar & Tracker application screenshot" width="800" height="450" loading="lazy" decoding="async"
                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="shot-placeholder">
             Add a screenshot as
@@ -212,7 +264,7 @@
 
       <div class="proj-row reveal">
         <div class="project-shot">
-          <img src="images/project-pgnest.jpg" alt="PG Nest screenshot"
+          <img src="images/project-pgnest.jpg" alt="PG Nest student accommodation web application screenshot" width="800" height="450" loading="lazy" decoding="async"
                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="shot-placeholder">
             Add a screenshot as
@@ -339,24 +391,27 @@
         </div>
       </div>
 
-      <form id="contact-form" class="reveal">
-        <input type="text" name="name" placeholder="Name" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <textarea name="message" rows="4" placeholder="Message" required></textarea>
+      <form id="contact-form" class="reveal" novalidate>
+        <!-- Honeypot anti-spam field -->
+        <input type="checkbox" name="botcheck" class="hidden-honeypot" tabindex="-1" autocomplete="off" style="display:none !important;">
+        <input type="text" name="name" id="form-name" placeholder="Name" required aria-label="Your Name">
+        <input type="email" name="email" id="form-email" placeholder="Email" required aria-label="Your Email Address">
+        <textarea name="message" id="form-message" rows="4" placeholder="Message" required aria-label="Your Message"></textarea>
         <div class="form-actions">
           <button type="submit" class="submit-btn" id="submit-btn">Send message</button>
-          <div id="form-status" class="form-status"></div>
+          <div id="form-status" class="form-status" aria-live="polite"></div>
         </div>
       </form>
     </div>
   </div>
 </section>
+</main>
 
-<footer>
+<<footer>
   <div class="footer-content">
     <div class="footer-left">
       <span>© 2026 Sangmesh Basnale</span>
-      <button id="admin-trigger" class="admin-trigger-btn" aria-label="Admin Portal">
+      <button id="admin-trigger" class="admin-trigger-btn" aria-label="Open Admin Dashboard Demo">
         <svg class="icon icon-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
       </button>
     </div>
@@ -368,8 +423,8 @@
   <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
 </button>
 
-<!-- ADMIN INBOX DASHBOARD MODAL -->
-<div id="admin-modal" class="admin-modal" aria-hidden="true">
+<!-- ADMIN INBOX DASHBOARD MODAL (UI/UX DEMO) -->
+<div id="admin-modal" class="admin-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
   <div class="admin-modal-overlay"></div>
   <div class="admin-modal-container">
     <button id="admin-close" class="admin-close-btn" aria-label="Close Admin Panel">&times;</button>
@@ -380,13 +435,16 @@
         <div class="admin-lock-icon">
           <svg viewBox="0 0 24 24" width="48" height="48"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="none" stroke="var(--accent)" stroke-width="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4" fill="none" stroke="var(--accent)" stroke-width="2"></path></svg>
         </div>
-        <h2 class="display">Admin Access</h2>
-        <p class="admin-subtitle">Enter passcode to view messages</p>
-        <div class="pin-input-wrapper">
-          <input type="password" id="admin-pin-input" maxlength="8" placeholder="••••" autofocus autocomplete="off">
+        <h2 id="admin-modal-title" class="display">Admin Dashboard (UI Demo)</h2>
+        <p class="admin-subtitle">UI/UX Demo Panel — LocalStorage simulated inbox for portfolio review</p>
+        <div class="demo-badge-notice">
+          ℹ️ <strong>Portfolio Demo:</strong> Enter passcode <code>1234</code> to preview the client-side inbox UI.
         </div>
-        <button id="admin-login-btn" class="admin-btn-action">Unlock Dashboard</button>
-        <div id="admin-login-error" class="admin-error-msg"></div>
+        <div class="pin-input-wrapper">
+          <input type="password" id="admin-pin-input" maxlength="8" placeholder="••••" autocomplete="off" aria-label="Admin passcode">
+        </div>
+        <button id="admin-login-btn" class="admin-btn-action">Unlock Dashboard Demo</button>
+        <div id="admin-login-error" class="admin-error-msg" aria-live="polite"></div>
       </div>
     </div>
 
@@ -394,7 +452,7 @@
     <div id="admin-dashboard-screen" class="admin-screen hidden">
       <div class="admin-dashboard-header">
         <div class="admin-header-title">
-          <h2 class="display">Inbox Dashboard</h2>
+          <h2 class="display">Inbox Dashboard (UI Demo)</h2>
           <span id="unread-count-badge" class="unread-badge">0 New</span>
         </div>
         <div class="admin-tabs">
@@ -410,7 +468,7 @@
           <!-- Sidebar: List of Messages -->
           <div class="admin-inbox-sidebar">
             <div class="search-bar-wrapper">
-              <input type="text" id="message-search" placeholder="Search sender or message...">
+              <input type="text" id="message-search" placeholder="Search sender or message..." aria-label="Search messages">
               <div class="filter-btns">
                 <button id="filter-all-btn" class="filter-btn active">All</button>
                 <button id="filter-unread-btn" class="filter-btn">Unread</button>
@@ -436,10 +494,10 @@
                 <div class="details-meta">
                   <span id="details-date" class="mono">Jul 8, 2026 12:00 AM</span>
                   <div class="details-actions">
-                    <button id="action-unread-btn" class="btn-icon" title="Mark as Unread">
+                    <button id="action-unread-btn" class="btn-icon" title="Mark as Unread" aria-label="Mark message as unread">
                       <svg viewBox="0 0 24 24" class="icon"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6" fill="currentColor"></circle></svg>
                     </button>
-                    <button id="action-delete-btn" class="btn-icon btn-delete" title="Delete Message">
+                    <button id="action-delete-btn" class="btn-icon btn-delete" title="Delete Message" aria-label="Delete message">
                       <svg viewBox="0 0 24 24" class="icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                   </div>
@@ -450,7 +508,7 @@
               </div>
               <div class="details-reply">
                 <h4 class="display">Reply directly</h4>
-                <textarea id="reply-text" rows="4" placeholder="Write your reply... (Pressing send will launch your email client with this reply)"></textarea>
+                <textarea id="reply-text" rows="4" placeholder="Write your reply... (Pressing send will launch your email client with this reply)" aria-label="Reply message body"></textarea>
                 <button id="send-reply-btn" class="admin-btn-action">Send Reply →</button>
               </div>
             </div>
@@ -463,7 +521,7 @@
         <div class="admin-settings-container">
           <div class="settings-section">
             <h3 class="display">Web3Forms Configuration</h3>
-            <p class="settings-desc">Enter your Web3Forms Access Key to receive actual emails when visitors submit the contact form. It's completely free.</p>
+            <p class="settings-desc">Enter your Web3Forms Access Key to receive actual emails when visitors submit the contact form.</p>
             <div class="setting-row">
               <label for="web3forms-key-input">Access Key</label>
               <input type="text" id="web3forms-key-input" placeholder="e.g. 12345678-abcd-efgh-ijkl-1234567890ab">
@@ -472,8 +530,8 @@
           </div>
 
           <div class="settings-section">
-            <h3 class="display">Admin Access Settings</h3>
-            <p class="settings-desc">Change the passcode used to unlock this inbox dashboard. (Default: 1234)</p>
+            <h3 class="display">Admin Access Settings (Demo)</h3>
+            <p class="settings-desc">Change the passcode used to unlock this inbox dashboard demo. (Default: 1234)</p>
             <div class="setting-row">
               <label for="new-pin-input">New Passcode</label>
               <input type="password" id="new-pin-input" maxlength="8" placeholder="Enter new PIN">
@@ -486,7 +544,7 @@
 
           <div class="settings-footer">
             <button id="save-settings-btn" class="admin-btn-action">Save Settings</button>
-            <div id="settings-status-msg" class="settings-status"></div>
+            <div id="settings-status-msg" class="settings-status" aria-live="polite"></div>
           </div>
         </div>
       </div>
@@ -494,6 +552,6 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js" defer></script>
 </body>
 </html>

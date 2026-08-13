@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sangmeshbasnale.github.io/sitemap.xml

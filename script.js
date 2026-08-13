@@ -10,12 +10,17 @@
   const navToggle = document.getElementById('nav-toggle');
   const mobileMenu = document.getElementById('mobile-menu');
   const menuIcon = document.getElementById('menu-icon');
-  navToggle.addEventListener('click', () => {
-    mobileMenu.classList.toggle('open');
-    menuIcon.innerHTML = mobileMenu.classList.contains('open')
-      ? '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>'
-      : '<line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line>';
-  });
+  if (navToggle && mobileMenu) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = mobileMenu.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      if (menuIcon) {
+        menuIcon.innerHTML = isOpen
+          ? '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>'
+          : '<line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line>';
+      }
+    });
+  }
 
   // Scroll reveal
   const revealEls = document.querySelectorAll('.reveal');
@@ -153,17 +158,47 @@
     localStorage.setItem(MSG_KEY, JSON.stringify(msgs));
   }
 
-  // 1. Submit Form
+  // 1. Submit Form with Validation, Honeypot & Web3Forms Email Delivery
   if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const formData = new FormData(contactForm);
-      const name = formData.get('name');
-      const email = formData.get('email');
-      const message = formData.get('message');
-      
-      // Save locally
+      const name = (formData.get('name') || '').trim();
+      const email = (formData.get('email') || '').trim();
+      const message = (formData.get('message') || '').trim();
+      const botcheck = formData.get('botcheck');
+
+      // Honeypot check: If bot filled the hidden checkbox, fake success & discard silently
+      if (botcheck) {
+        formStatus.textContent = 'Message sent successfully!';
+        formStatus.className = 'form-status visible success';
+        contactForm.reset();
+        setTimeout(() => { formStatus.className = 'form-status'; }, 4000);
+        return;
+      }
+
+      // Client-side Validation
+      if (!name) {
+        formStatus.textContent = 'Please enter your name.';
+        formStatus.className = 'form-status visible error';
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        formStatus.textContent = 'Please enter a valid email address.';
+        formStatus.className = 'form-status visible error';
+        return;
+      }
+
+      if (!message) {
+        formStatus.textContent = 'Please enter your message.';
+        formStatus.className = 'form-status visible error';
+        return;
+      }
+
+      // Always save to localStorage as local inbox cache
       const messages = getMessages();
       const newMsg = {
         id: 'msg_' + Date.now(),
@@ -182,7 +217,8 @@
       formStatus.className = 'form-status visible loading';
 
       const apiKey = localStorage.getItem(KEY_KEY) || '';
-      let apiSuccess = true;
+      let apiSuccess = false;
+      let statusNote = '';
 
       if (apiKey) {
         // Submit to Web3Forms API
@@ -203,64 +239,111 @@
           });
           const result = await response.json();
           apiSuccess = result.success;
+          if (!apiSuccess) {
+            statusNote = result.message || 'Email delivery failed.';
+          }
         } catch (error) {
-          console.error('API submit error:', error);
+          console.error('Web3Forms API submit error:', error);
           apiSuccess = false;
+          statusNote = 'Network error sending email.';
         }
+      } else {
+        // No key configured in settings yet
+        apiSuccess = true;
+        statusNote = ' (Saved to local inbox demo)';
       }
 
       submitBtn.disabled = false;
       if (apiSuccess) {
-        formStatus.textContent = 'Message sent successfully!';
+        formStatus.textContent = `Message sent successfully!${statusNote}`;
         formStatus.className = 'form-status visible success';
         contactForm.reset();
         setTimeout(() => {
           formStatus.className = 'form-status';
         }, 5000);
       } else {
-        formStatus.textContent = 'Saved locally, but failed to deliver email.';
+        formStatus.textContent = `Saved to local inbox, but email delivery failed: ${statusNote}`;
         formStatus.className = 'form-status visible error';
         setTimeout(() => {
           formStatus.className = 'form-status';
-        }, 5000);
+        }, 6000);
       }
     });
   }
 
-  // 2. Open/Close Modal
+  // 2. Open/Close Modal & Focus Trap Management
+  let previousActiveElement = null;
+
+  function openAdminModal() {
+    previousActiveElement = document.activeElement;
+    adminModal.classList.add('show');
+    adminModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    if (sessionStorage.getItem('admin_logged_in') === 'true') {
+      showDashboard();
+    } else {
+      showLogin();
+    }
+  }
+
+  function closeAdminModal() {
+    adminModal.classList.remove('show');
+    adminModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+      previousActiveElement.focus();
+    }
+  }
+
   if (adminTrigger) {
-    adminTrigger.addEventListener('click', () => {
-      adminModal.classList.add('show');
-      adminModal.setAttribute('aria-hidden', 'false');
-      // If already logged in this session
-      if (sessionStorage.getItem('admin_logged_in') === 'true') {
-        showDashboard();
-      } else {
-        showLogin();
-      }
-    });
+    adminTrigger.addEventListener('click', openAdminModal);
   }
 
   if (adminClose) {
-    adminClose.addEventListener('click', () => {
-      adminModal.classList.remove('show');
-      adminModal.setAttribute('aria-hidden', 'true');
-    });
+    adminClose.addEventListener('click', closeAdminModal);
   }
 
   // Close modal on click outside content
   window.addEventListener('click', (e) => {
     if (e.target === adminModal) {
-      adminModal.classList.remove('show');
-      adminModal.setAttribute('aria-hidden', 'true');
+      closeAdminModal();
     }
   });
 
-  // Close on Escape key
+  // Close on Escape key & Keyboard Focus Trap within Modal
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && adminModal.classList.contains('show')) {
-      adminModal.classList.remove('show');
-      adminModal.setAttribute('aria-hidden', 'true');
+    if (!adminModal.classList.contains('show')) return;
+
+    if (e.key === 'Escape') {
+      closeAdminModal();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      const focusables = adminModal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const visibleFocusables = Array.from(focusables).filter(
+        el => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement
+      );
+
+      if (visibleFocusables.length === 0) return;
+
+      const firstEl = visibleFocusables[0];
+      const lastEl = visibleFocusables[visibleFocusables.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          lastEl.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          firstEl.focus();
+          e.preventDefault();
+        }
+      }
     }
   });
 
